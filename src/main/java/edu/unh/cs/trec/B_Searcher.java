@@ -1,4 +1,4 @@
-package Lucene;
+package edu.uh.cs.trec;
 
 import java.io.File;
 import java.io.IOException;

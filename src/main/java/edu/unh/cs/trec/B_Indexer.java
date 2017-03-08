@@ -1,4 +1,4 @@
-package Lucene;
+package edu.uh.cs.trec;
 
 
 import java.io.BufferedReader;

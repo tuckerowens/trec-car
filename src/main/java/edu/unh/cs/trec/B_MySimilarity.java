@@ -1,4 +1,4 @@
-package Lucene;
+package edu.unh.cs.trec;
 
 
 
