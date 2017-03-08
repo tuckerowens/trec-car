@@ -59,7 +59,7 @@ public class Searcher {
 	public List<SearchResult> search(edu.unh.cs.trec.Query q, String tag) {
 
 		try {
-			TopDocs docs = searcher.search(new QueryParser("text", analyzer).parse(q.getQuery()), 10);
+			TopDocs docs = searcher.search(new QueryParser("text", analyzer).parse(q.getQuery()), 500);
 			ScoreDoc[] hits = docs.scoreDocs;
 
 			// 4. display results

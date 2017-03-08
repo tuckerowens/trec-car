@@ -4,6 +4,7 @@ import edu.unh.cs.trec.indexing.Indexer;
 import edu.unh.cs.trec.search.*;
 import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.TFIDFSimilarity;
 import java.io.File;
 
 /**
@@ -62,7 +63,8 @@ public class TrecCar {
         Searcher search;
 
         if (baseline) {
-          search = new Searcher( new File(indexDir), new BM25Similarity() );
+          //search = new Searcher( new File(indexDir), new BM25Similarity() );
+          search = new Searcher( new File(indexDir), new DefaultSimilarity() );
         } else {
           search = new Searcher(new File(indexDir), new MySimilarity(new DefaultSimilarity()));
         }
