@@ -34,8 +34,8 @@ public class Indexer {
 
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-        config.setRAMBufferSizeMB(64);
-        config.setMaxBufferedDocs(4000);
+        config.setRAMBufferSizeMB(3096);
+        config.setMaxBufferedDocs(10000);
         IndexWriter w = new IndexWriter(directory, config);
 
 

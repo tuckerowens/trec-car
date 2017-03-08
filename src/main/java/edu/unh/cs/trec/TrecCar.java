@@ -7,6 +7,8 @@ import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
 import java.io.File;
 
+import java.util.stream.*;
+
 /**
  * Hello world!
  *
@@ -68,11 +70,24 @@ public class TrecCar {
         } else {
           search = new Searcher(new File(indexDir), new MySimilarity(new DefaultSimilarity()));
         }
-        for ( Query q : QueryReader.getQueries(datafile)) {
-          for ( SearchResult sr : search.search(q, baseline ? "baseline" : "test")) {
-            System.out.println(sr.toString());
-          }
-        }
+
+        final String tag = baseline ? "baseline" : "test";
+
+        QueryReader.getQueries( datafile )
+          .parallelStream()
+          .forEach( q -> {
+            System.err.println(q.toString());
+            search.search(q, tag)
+              .stream()
+              .forEach(sr -> System.out.println(sr.toString()) );
+          });
+
+        // for ( Query q : QueryReader.getQueries(datafile)) {
+        //   System.err.println( q.toString() );
+        //   for ( SearchResult sr : search.search(q, baseline ? "baseline" : "test")) {
+        //     System.out.println(sr.toString());
+        //   }
+        // }
 
 
     }
