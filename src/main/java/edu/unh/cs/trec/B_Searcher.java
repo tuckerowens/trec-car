@@ -3,7 +3,7 @@ package edu.uh.cs.trec;
 import java.io.File;
 import java.io.IOException;
 
-
+import edu.unh.cs.trec.B_MySimilarity;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
