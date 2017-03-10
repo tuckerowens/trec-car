@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.stream.*;
 
 /**
- * Hello world!
+ * TrecCar.java - The main class
  *
  */
 public class TrecCar {
@@ -20,78 +20,70 @@ public class TrecCar {
 
     public static void main( String[] args ) {
 
-      if ( args.length < 2 ) {
-        System.out.println("Basic usage: trec-car <indexdir> <outline>");
-      }
+        if ( args.length < 2 ) {
+            System.out.println("Basic usage: trec-car <indexdir> <outline>");
+        }
 
-      boolean index = false;
-      String indexDir = args[0];
-      String datafile = args[1];
+        boolean index = false;
+        String indexDir = args[0];
+        String datafile = args[1];
 
 
-      boolean baseline = false;
+        boolean baseline = false;
+        boolean bm25 = false; //  using BM25 similarities
 
-      for (int i = 0; i < args.length; i++) {
-          if ( args[i].equals("--index") ) {
-            i++;
-            if ( args.length < i+2 ){
-              System.out.println("Index mode args: <indexdir> <datafile>" );
-              System.exit(0);
+        for (int i = 0; i < args.length; i++) {
+            if ( args[i].equals("--index") ) {
+                i++;
+                if ( args.length < i+2 ){
+                    System.out.println("Index mode args: <indexdir> <datafile>" );
+                    System.exit(0);
+                }
+                indexDir = args[i++];
+                datafile = args[i];
+                index = true;
             }
-            indexDir = args[i++];
-            datafile = args[i];
-            index = true;
-          }
 
-          if (args[i].equals("--baseline")) {
-            baseline = true; i++;
-            indexDir = args[i++];
-            datafile = args[i];
-          }
+            if (args[i].equals("--baseline")) {
+                baseline = true; i++;
+                indexDir = args[i++];
+                datafile = args[i];
+            }
 
         }
 
         if ( index ) {
-          System.out.println("Indexing Paragraphs");
-          try {
-            Indexer.buildIndex(indexDir, datafile);
-          } catch (Exception e) {
-            System.out.println("Indexing Failed");
-          }
-          System.exit(0);
+            System.out.println("Indexing Paragraphs");
+            try {
+                Indexer.buildIndex(indexDir, datafile);
+            } catch (Exception e) {
+                System.out.println("Indexing Failed");
+            }
+            System.exit(0);
         }
 
 
         Searcher search;
 
         if (baseline) {
-          //search = new Searcher( new File(indexDir), new BM25Similarity() );
-          search = new Searcher( new File(indexDir), new DefaultSimilarity() );
+            search = new Searcher( new File(indexDir), new DefaultSimilarity() );
+        } else if(bm25) {
+            search = new Searcher(new File(indexDir), new BM25Similarity());
         } else {
-          search = new Searcher(new File(indexDir), new MySimilarity(new DefaultSimilarity()));
+            search = new Searcher(new File(indexDir), new MySimilarity(new DefaultSimilarity()));
         }
 
         final String tag = baseline ? "baseline" : "test";
 
         QueryReader.getQueries( datafile )
-          .parallelStream()
-          .forEach( q -> {
-            System.err.println(q.toString());
-            search.search(q, tag)
-              .stream()
-              .forEach(sr -> System.out.println(sr.toString()) );
-          });
-
-        // for ( Query q : QueryReader.getQueries(datafile)) {
-        //   System.err.println( q.toString() );
-        //   for ( SearchResult sr : search.search(q, baseline ? "baseline" : "test")) {
-        //     System.out.println(sr.toString());
-        //   }
-        // }
-
+                .parallelStream()
+                .forEach( q -> {
+                    System.err.println(q.toString());
+                    search.search(q, tag)
+                            .stream()
+                            .forEach(sr -> System.out.println(sr.toString()) );
+                });
 
     }
-
-
 
 }
