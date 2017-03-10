@@ -9,3 +9,8 @@ mvn clean
 
 
 rm -rf ~/trec-car/index
+rm -rf ~/trec-car/data
+
+rm -rf ~/trec-car/trec-car
+rm -rf ~/trec-car/trec-car-eval
+
