@@ -1,3 +1,8 @@
+/**
+ * MySimilarity.java - a class for future implementation of finding similarities.
+ *                     This class will be an alternative to Default and BM25 similarity methods.
+ *
+ */
 package edu.unh.cs.trec.search;
 
 

@@ -10,7 +10,9 @@ import java.io.File;
 import java.util.stream.*;
 
 /**
- * TrecCar.java - The main class
+ * TrecCar.java - The main class for baseline TREC-CAR
+ *                 The class requires two arguments index directory and
+ *                 outlines. The flag --index set the program in the index mood.
  *
  */
 public class TrecCar {
