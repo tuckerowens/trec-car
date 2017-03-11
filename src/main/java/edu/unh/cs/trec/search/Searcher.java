@@ -1,3 +1,9 @@
+/**
+ *
+ * Searcher.java - read the index directory. Given a query,
+ * the searcher can compute the similarity between the query
+ * and the all the vectorised docs and generate a rank List
+ */
 package edu.unh.cs.trec.search;
 
 import java.io.File;
@@ -66,16 +72,16 @@ public class Searcher {
 			ArrayList<SearchResult> results = new ArrayList<SearchResult>();
 
 			for(int i=0;i<hits.length;++i) {
-					int docId = hits[i].doc;
-					Document d = searcher.doc(docId);
+				int docId = hits[i].doc;
+				Document d = searcher.doc(docId);
 
-					results.add( new SearchResult(
+				results.add( new SearchResult(
 						q.getQueryID(),
 						d.get("paraID"),
 						i+1,
 						hits[i].score,
 						tag
-					) );
+				) );
 			}
 			return results;
 		} catch (Exception e ) {
@@ -86,49 +92,45 @@ public class Searcher {
 
 
 
+	public static void searchEngine(String[] queries) throws IOException, ParseException{
+		Analyzer analyzer = new StandardAnalyzer();
+
+		int modelNum = 1;
+
+		// 3. search
+		int hitsPerPage = 10;
+		String indexPath = "indexfile/";
+		Directory directory = FSDirectory.open(new File (indexPath));
+		DirectoryReader reader = DirectoryReader.open(directory);
+		IndexSearcher searcher = new IndexSearcher(reader);
+		if(modelNum == 1){
+			searcher.setSimilarity(new BM25Similarity());
+		} else if(modelNum ==2){
+			MySimilarity similarity = new MySimilarity(new DefaultSimilarity());
+			searcher.setSimilarity(similarity);
+		}
 
 
-  public static void searchEngine(String[] queries) throws IOException, ParseException{
-	  Analyzer analyzer = new StandardAnalyzer();
+		for(String s :queries){
+			org.apache.lucene.search.Query q = new QueryParser("text", analyzer).parse(s);
+			TopDocs docs = searcher.search(q, hitsPerPage);
+			ScoreDoc[] hits = docs.scoreDocs;
 
-      int modelNum = 1;
-//      Query q = new QueryParser("Content", analyzer).parse(querystr);
+			// 4. display results
+			System.out.printf("\nquery: %s \n",s);
+			System.out.println("Found " + hits.length + " hits.");
+			for(int i=0;i<hits.length;++i) {
+				int docId = hits[i].doc;
+				Document d = searcher.doc(docId);
+				System.out.println((i + 1) + ". "+ hits[i]+" "+ d.get("text"));
+			}
 
-      // 3. search
-      int hitsPerPage = 10;
-      String indexPath = "indexfile/";
-      Directory directory = FSDirectory.open(new File (indexPath));
-      DirectoryReader reader = DirectoryReader.open(directory);
-      IndexSearcher searcher = new IndexSearcher(reader);
-      if(modelNum == 1){
-//      	searcher.setSimilarity(new BM25Similarity());
-      	searcher.setSimilarity(new BM25Similarity());
-      }else if(modelNum ==2){
-      	MySimilarity similarity = new MySimilarity(new DefaultSimilarity());
-        searcher.setSimilarity(similarity);
-    }
+		}
 
-
-      for(String s :queries){
-       	org.apache.lucene.search.Query q = new QueryParser("text", analyzer).parse(s);
-        TopDocs docs = searcher.search(q, hitsPerPage);
-        ScoreDoc[] hits = docs.scoreDocs;
-
-        // 4. display results
-        System.out.printf("\nquery: %s \n",s);
-        System.out.println("Found " + hits.length + " hits.");
-        for(int i=0;i<hits.length;++i) {
-            int docId = hits[i].doc;
-            Document d = searcher.doc(docId);
-            System.out.println((i + 1) + ". "+ hits[i]+" "+ d.get("text"));
-        }
-
-      }
-
-      // reader can only be closed when there
-      // is no need to access the documents any more.
-      reader.close();
-  }
+		// reader can only be closed when there
+		// is no need to access the documents any more.
+		reader.close();
+	}
 
 
 
