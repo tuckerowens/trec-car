@@ -50,7 +50,7 @@ public class B_Searcher {
             ScoreDoc[] hits = docs.scoreDocs;
 
             // 4. display results
-            System.out.println("query: %s ",s);
+            System.out.println("query: " + s);
             System.out.println("Found " + hits.length + " hits.");
             for(int i=0;i<hits.length;++i) {
                 int docId = hits[i].doc;
