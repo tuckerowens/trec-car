@@ -46,5 +46,3 @@ public class B_MySimilarity extends Similarity {
         };
       }
   }
-
-

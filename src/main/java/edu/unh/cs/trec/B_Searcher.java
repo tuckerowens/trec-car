@@ -1,4 +1,4 @@
-package edu.uh.cs.trec;
+package edu.unh.cs.trec;
 
 import java.io.File;
 import java.io.IOException;

@@ -19,6 +19,8 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+import java.util.stream.StreamSupport;
+
 import edu.unh.cs.trec.cbor.*;
 
 public class Indexer {
@@ -34,9 +36,9 @@ public class Indexer {
 
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-        config.setRAMBufferSizeMB(3096);
-        config.setMaxBufferedDocs(10000);
-        IndexWriter w = new IndexWriter(directory, config);
+        config.setRAMBufferSizeMB(43);
+        config.setUseCompoundFile(false);
+        final IndexWriter w = new IndexWriter(directory, config);
 
 
 
@@ -45,14 +47,26 @@ public class Indexer {
 
 				try {
 
-	        for (Data.Paragraph p : DeserializeData.iterableParagraphs( fstream )) {
-						Document doc = new Document();
+          StreamSupport.stream(DeserializeData.iterableParagraphs(fstream).spliterator(), false)
+                       .parallel()
+                       .forEach( p -> {
+                         Document doc = new Document();
 
-		        doc.add(new TextField("text", p.getTextOnly(), Field.Store.YES));
-		        doc.add(new StringField("paraID", p.getParaId(), Field.Store.YES));
-		        doc.add(new StringField("entities", String.join(" ", p.getEntitiesOnly()), Field.Store.YES));
-		        w.addDocument(doc);
-					}
+                         doc.add(new TextField("text", p.getTextOnly(), Field.Store.YES));
+                         doc.add(new StringField("paraID", p.getParaId(), Field.Store.YES));
+                         doc.add(new StringField("entities", String.join(" ", p.getEntitiesOnly()), Field.Store.YES));
+
+                         try { w.addDocument(doc); } catch(Exception e ){}
+                       });
+
+	        // for (Data.Paragraph p : DeserializeData.iterableParagraphs( fstream )) {
+					// 	Document doc = new Document();
+          //
+		      //   doc.add(new TextField("text", p.getTextOnly(), Field.Store.YES));
+		      //   doc.add(new StringField("paraID", p.getParaId(), Field.Store.YES));
+		      //   doc.add(new StringField("entities", String.join(" ", p.getEntitiesOnly()), Field.Store.YES));
+		      //   w.addDocument(doc);
+					// }
 				} catch (Exception e){
 				} finally {
 					fstream.close();

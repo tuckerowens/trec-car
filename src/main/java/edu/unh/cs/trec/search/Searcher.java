@@ -65,13 +65,13 @@ public class Searcher {
 	public List<SearchResult> search(edu.unh.cs.trec.Query q, String tag) {
 
 		try {
-			TopDocs docs = searcher.search(new QueryParser("text", analyzer).parse(q.getQuery()), 200);
+			TopDocs docs = searcher.search(new QueryParser("text", analyzer).parse(q.getQuery()), 1000);
 			ScoreDoc[] hits = docs.scoreDocs;
 
 			// 4. display results
 			ArrayList<SearchResult> results = new ArrayList<SearchResult>();
 
-			for(int i=0;i<hits.length;++i) {
+			for(int i = 0; i < hits.length; i++) {
 				int docId = hits[i].doc;
 				Document d = searcher.doc(docId);
 
@@ -85,7 +85,7 @@ public class Searcher {
 			}
 			return results;
 		} catch (Exception e ) {
-			System.err.println(e.getStackTrace()[0].toString());
+			System.err.println(q);
 			return new ArrayList<SearchResult>();
 		}
 	}

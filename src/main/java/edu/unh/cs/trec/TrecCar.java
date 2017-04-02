@@ -2,6 +2,7 @@ package edu.unh.cs.trec;
 
 import edu.unh.cs.trec.indexing.Indexer;
 import edu.unh.cs.trec.search.*;
+import edu.unh.cs.trec.entity.*;
 import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
@@ -78,9 +79,7 @@ public class TrecCar {
         final String tag = baseline ? "baseline" : "test";
 
         QueryReader.getQueries( datafile )
-                .parallelStream()
                 .forEach( q -> {
-                    System.err.println(q.toString());
                     search.search(q, tag)
                             .stream()
                             .forEach(sr -> System.out.println(sr.toString()) );

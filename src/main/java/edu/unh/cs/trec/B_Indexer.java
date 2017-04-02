@@ -1,4 +1,4 @@
-package edu.uh.cs.trec;
+package edu.unh.cs.trec;
 
 
 import java.io.BufferedReader;
@@ -22,15 +22,15 @@ import org.apache.lucene.util.Version;
 public class B_Indexer {
 	private  static String indexPath;
 	private   static  String dataPath;
-	
-	
+
+
 
 	public static IndexWriter indexWriterCreator(String indexPath, int create_or_append) throws IOException{
-		
+
     	Analyzer analyzer = new StandardAnalyzer();
-    	
+
         // 1. create the index
-    	
+
         FSDirectory directory = FSDirectory.open(new File(indexPath));
 
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_10_1, analyzer);
@@ -40,10 +40,10 @@ public class B_Indexer {
         config.setMaxBufferedDocs(4000);
         IndexWriter w = new IndexWriter(directory, config);
         return w;
-        
+
 	}
 
-    
+
 
     public static void addDoc(IndexWriter w, String content, String paraId, String entities) throws IOException {
         Document doc = new Document();
