@@ -19,11 +19,11 @@ cd ..
 
 if [ ! -d "index" ]; then
   mkdir index
+  java -jar trec-car/target/trec-car-1.0-SNAPSHOT-jar-with-dependencies.jar --index index $1
 fi
 
-temp_run=`mktemp`
 
-java -jar trec-car/target/trec-car-1.0-SNAPSHOT-jar-with-dependencies.jar --index data $1
-java -jar trec-car/target/trec-car-1.0-SNAPSHOT-jar-with-dependencies.jar --baseline data $2 > $temp_run
 
-java -jar trec-car-eval/trec-eval/target/trec-eval-1.0-SNAPSHOT.jar $temp_run $3
+java -jar trec-car/target/trec-car-1.0-SNAPSHOT-jar-with-dependencies.jar --baseline index $2 > runfile
+
+
