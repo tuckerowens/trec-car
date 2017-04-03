@@ -13,8 +13,7 @@ public class QueryReader {
 
 
   private static Dictionary dict;
-  private static EntityDict eDict;
-  private static EntityGraph kbGraph;
+
 
   static {
     try {
@@ -24,24 +23,6 @@ public class QueryReader {
     } catch (Exception e) {
         dict = null;
     }
-
-    try {
-      System.err.println("Loading Entity Dictionary");
-      eDict = new EntityDict( "/Users/Tucker/Desktop/tuckerowens/knowledgebasedict" );
-      System.err.println("Entity Dictionary Loaded");
-    } catch (Exception e ) {
-      System.err.println(e);
-      eDict = null;
-    }
-
-    try {
-      System.err.println("Loading KB Graph");
-      kbGraph = new EntityGraph( "/Users/Tucker/Desktop/tuckerowens/knowledgebasegraph" );
-      System.err.println("KB Graph Loaded");
-    } catch(Exception e) {
-
-    }
-
 
   }
 
@@ -84,10 +65,6 @@ public class QueryReader {
           }
       }
     } catch (Exception e) {}
-
-      for ( Query q : out ) {
-        q.expandQuery( eDict );
-      }
 
     return out;
   }

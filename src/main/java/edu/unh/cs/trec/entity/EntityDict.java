@@ -20,8 +20,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.*;
+import org.apache.lucene.search.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -53,40 +53,49 @@ public class EntityDict {
 
       } catch (Exception e){
       } finally {
-        fstream.close();
+
         // Close the writer
         w.close();
       }
   }
 
-  public EntityDict( String file ) {
 
-    root = new TrieNode();
-    data = new HashMap<>();
-    try ( Stream<String> dStream = Files.lines( Paths.get(file) ) ) {
+  private IndexSearcher searcher;
+	private Analyzer analyzer;
+	private DirectoryReader dr;
 
-      dStream.map(String::trim)
-             .filter( l -> l.contains("\t"))
-             .map( l -> l.split("\t") )
-             .forEach( s -> {
-               data.put(s[0].toLowerCase(), s[1]);
-             });
+  public EntityDict( String indexdir ) {
 
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    try {
+			dr = DirectoryReader.open( FSDirectory.open( new File(indexdir) ) );
+			searcher = new IndexSearcher(dr);
+		} catch( Exception e ) {
+			throw new IllegalArgumentException("Those parameters don't seem valid");
+		}
+
 
   }
 
   public EntityResult lookup( String s ) {
-    return new EntityResult(data.containsKey( s.toLowerCase() ) ? data.get( s.toLowerCase() ) : null, 0);
+    Term t = new Term("surface_name", s);
+    Query q = new FuzzyQuery(t);
+    try {
+      TopDocs td = searcher.search(q, 1);
+      for ( ScoreDoc sc : td.scoreDocs  ) {
+        Document d = searcher.doc( sc.doc );
+        return new EntityResult( d.get( "entity" ), sc.score );
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    return null;
   }
 
 
   public class EntityResult {
     public String name;
-    public int error;
-    public EntityResult( String name, int error ) {
+    public float error;
+    public EntityResult( String name, float error ) {
       this.name = name;
       this.error = error;
     }
@@ -96,115 +105,6 @@ public class EntityDict {
     }
   }
 
-
-  public class TrieNode {
-
-    private HashMap<Character, TrieNode> kids;
-    private boolean leaf;
-    private String entityName;
-
-    public TrieNode(String base) {
-      kids = new HashMap<>();
-      entityName = base;
-      leaf = true;
-    }
-
-    public TrieNode() {
-      kids = new HashMap<>();
-      leaf = false;
-    }
-
-
-    public void insert( String s, String base) {
-      if ( s.length() == 0 ) {
-        leaf = true;
-        entityName = base;
-        return;
-      }
-
-      Character c = new Character( s.charAt(0) );
-
-      if ( !kids.containsKey( c ) ) {
-        kids.put( c, new TrieNode() );
-      }
-
-      kids.get( c ).insert( s.substring(1), base );
-    }
-
-
-    // iterative deepening on allowable edits.
-    public EntityResult contains( String s ) {
-      String temp;
-      for ( int i = 0; i < s.length(); i++) {
-        if ( (temp = contains_(s, i)) != null )
-          return new EntityResult(temp, i);
-      }
-      return null;
-    }
-
-    private String contains_( String s, int tolrence ) {
-      // End of the line case
-      if ( s.length() == 0 && tolrence == 0 )
-        return leaf ? entityName : null;
-
-      // We can only insert
-      if ( s.length() == 0 ) {
-        if ( leaf )
-          return entityName;
-        for ( TrieNode tn : kids.values() ) {
-          String temp = tn.contains_( s, tolrence-1 );
-          if ( temp != null )
-            return temp;
-        }
-        return null;
-      }
-
-      Character c = new Character(s.charAt(0));
-
-      // No changes allowed, must be perfect from here on
-      if ( tolrence == 0 ) {
-        if ( kids.containsKey( c ) )
-          return kids.get( c ).contains_( s.substring(1), tolrence );
-        else
-          return null;
-      }
-
-      // Do we have enough deletions to make this node work
-      if ( s.length() <= tolrence && leaf )
-        return entityName;
-
-      // No modification case
-      if ( kids.containsKey( c ) ) {
-        String temp = kids.get( c ).contains_( s.substring(1), tolrence );
-        if (temp != null)
-          return temp;
-      }
-
-      // Delete
-      String temp = contains_( s.substring(1), tolrence-1 );
-      if ( temp != null ) return temp;
-
-      for ( TrieNode tn : kids.values() ) {
-          //Insert
-          temp = tn.contains_( s, tolrence-1 );
-          if ( temp != null ) return temp;
-
-          // Swap case
-          temp = tn.contains_( s.substring(1), tolrence-1 );
-          if ( temp != null ) return temp;
-
-
-        }
-
-        return null;
-
-    }
-
-
-
-
-
-  }
 
 
 }
