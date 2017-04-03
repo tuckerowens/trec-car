@@ -35,52 +35,57 @@ public class Query {
     StringBuilder sb = new StringBuilder();
     terms.add(query);
 
-    for (net.sf.extjwnl.data.IndexWord word : wordSet.getIndexWordCollection()) {
-      for ( net.sf.extjwnl.data.Synset syn : word.getSenses() ) {
-        for (net.sf.extjwnl.data.Word w : syn.getWords()) {
-          terms.add( w.getLemma().toLowerCase() );
-        }
-      }
-    }
-
-    for (String s : terms) {
-      if ( rand.nextDouble() < 0.2 ) {
-        sb.append(s); sb.append(" ");
-      }
-    }
-
-    this.query = sb.toString();
+    // for (net.sf.extjwnl.data.IndexWord word : wordSet.getIndexWordCollection()) {
+    //   for ( net.sf.extjwnl.data.Synset syn : word.getSenses() ) {
+    //     for (net.sf.extjwnl.data.Word w : syn.getWords()) {
+    //       terms.add( w.getLemma().toLowerCase() );
+    //     }
+    //   }
+    // }
+    //
+    // for (String s : terms) {
+    //   if ( rand.nextDouble() < 0.2 ) {
+    //     sb.append(s); sb.append(" ");
+    //   }
+    // }
+    //
+    // this.query = sb.toString();
     //System.err.println(this.query);
 
   }
 
 
-  public void expandQuery( EntityDict edict ) {
+  public void expandQuery( ) {
     String parts[] = query.split("\\s+");
-    // for ( int i = 0; i < parts.length - 3; i ++) {
-    //   StringBuilder sb = new StringBuilder(parts[i]);
-    //   EntityDict.EntityResult unigram = edict.lookup(sb.toString());
-    //   sb.append(" " + parts[i+1]);
-    //   EntityDict.EntityResult bigram = edict.lookup(sb.toString());
-    //   sb.append(" " + parts[i+2]);
-    //   EntityDict.EntityResult trigram = edict.lookup(sb.toString());
-    //
-    //   if ( trigram.name != null ) {
-    //     parts[i] = trigram.name;
-    //     parts[i+1] = "";
-    //     parts[i+2] = "";
-    //     i += 2;
-    //   } else if ( bigram.name != null ) {
-    //     parts[i] = bigram.name;
-    //     parts[i+1] = "";
-    //     i ++;
-    //   } else if ( unigram.name != null ) {
-    //     parts[i] = unigram.name;
-    //   }
-    // }
+    for ( int i = 0; i < parts.length - 3; i ++) {
+      StringBuilder sb = new StringBuilder(parts[i]);
+      EntityDict.EntityResult unigram = EntityHelper.entityDict.lookup(sb.toString());
+      sb.append(" " + parts[i+1]);
+      EntityDict.EntityResult bigram = EntityHelper.entityDict.lookup(sb.toString());
+      sb.append(" " + parts[i+2]);
+      EntityDict.EntityResult trigram = EntityHelper.entityDict.lookup(sb.toString());
+      sb.append(" ");
 
-    query = String.join( " ", parts ).replaceAll("[\\(\\)\\\\/#]|:\\w+:", "");
-    System.err.println( query );
+      if ( trigram != null ) {
+        parts[i] = sb.toString() + trigram.getKBNode().toShortString();
+        parts[i+1] = "";
+        parts[i+2] = "";
+        i += 2;
+        break;
+      } else if ( bigram != null ) {
+        parts[i] = sb.toString() + bigram.getKBNode().toShortString();
+        parts[i+1] = "";
+        i ++;
+        break;
+      } else if ( unigram != null ) {
+        parts[i] = sb.toString() + unigram.getKBNode().toShortString();
+        break;
+      }
+    }
+
+    // System.err.print(query + "  ==>  ");
+    query = String.join( " ", parts ).replaceAll("[\\(\\)\\\\/#:]|:\\w+:", "");
+    // System.err.println( query );
   }
 
   public String getQuery() { return query; }

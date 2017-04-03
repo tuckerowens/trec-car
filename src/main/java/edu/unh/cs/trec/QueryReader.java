@@ -55,8 +55,8 @@ public class QueryReader {
       FileInputStream fstream = new FileInputStream( new File(outline) );
       for (Data.Page p : DeserializeData.iterableAnnotations(fstream)) {
 
-          List<DBPediaEntry> dbes = SpotlightLinker.getEntities(p.getPageName());
-          DBPediaEntry dbe = dbes.size() > 0 ? dbes.get(0) : null;
+          // List<DBPediaEntry> dbes = SpotlightLinker.getEntities(p.getPageName());
+          DBPediaEntry dbe = null; //dbes.size() > 0 ? dbes.get(0) : null;
           for (Data.Section s : p.getChildSections()) {
             for (Query q : getQueries_(s)) {
               out.add( new Query( p.getPageName() + " " + q.getQuery(),
@@ -65,7 +65,7 @@ public class QueryReader {
           }
       }
     } catch (Exception e) {}
-
+      out.stream().parallel().forEach(q -> q.expandQuery());
     return out;
   }
 

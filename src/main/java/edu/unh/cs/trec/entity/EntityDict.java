@@ -103,6 +103,11 @@ public class EntityDict {
     public String toString() {
       return name + " -> " + error;
     }
+
+    public EntityGraph.KBNode getKBNode() {
+      return EntityHelper.entityGraph.lookup(name);
+    }
+
   }
 
 

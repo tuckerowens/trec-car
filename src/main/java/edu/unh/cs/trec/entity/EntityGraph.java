@@ -85,24 +85,34 @@ public class EntityGraph {
         TopDocs td = searcher.search(q, 1);
         for ( ScoreDoc sc : td.scoreDocs  ) {
           Document d = searcher.doc( sc.doc );
-          return new KBNode( d.get( "node" ), Arrays.asList(d.get("edges").split("\t")), this );
+          return new KBNode( d.get( "node" ), Arrays.asList(d.get("edges").split("\t")) );
         }
       } catch (Exception e){
         throw new RuntimeException(e);
       }
-      return null;
+      return new KBNode(s, new ArrayList<String>());
     }
 
 
     public class KBNode {
       public String name;
-      private EntityGraph parent;
       private List<String> edges;
 
-      public KBNode( String name, List<String> edges, EntityGraph parent) {
+      public KBNode( String name, List<String> edges) {
         this.name = name;
         this.edges = edges;
-        this.parent = parent;
+      }
+
+      public String toString() {
+        return name + " " + String.join(" ", edges);
+      }
+
+      public String toShortString() {
+        List<String> neighbors = getNeighborhood().stream()
+                                    .filter( n -> n.edges.size() <= 5 )
+                                    .map(n -> n.toString())
+                                    .collect(Collectors.toList());
+        return name + " " + String.join(" ", neighbors);
       }
 
       public List<KBNode> getNeighborhood() {
